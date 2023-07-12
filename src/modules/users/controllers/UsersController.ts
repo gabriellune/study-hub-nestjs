@@ -4,6 +4,7 @@ import { UsersService } from '../services/UsersService';
 import { User } from '../models/entities/User';
 import { ReqResUser } from '../models/interfaces/ReqResUser';
 import { CreateUserDTO } from '../models/dto/CreateUserDTO';
+import { CreateMainAdminUser } from '../models/dto/CreateMainAdminUserDTO';
 
 @Controller('users')
 @ApiTags('Users')
@@ -16,9 +17,11 @@ export class UsersController {
     return this.service.create(payload);
   }
 
-  @Post()
+  @Post('main-admin')
   @ApiOperation({ summary: 'Create Main Admin User' })
-  async createMainAdminUser(@Body() payload: CreateUserDTO): Promise<void> {
+  async createMainAdminUser(
+    @Body() payload: CreateMainAdminUser,
+  ): Promise<void> {
     return this.service.createMainAdminUser(payload);
   }
 

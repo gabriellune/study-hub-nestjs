@@ -4,6 +4,7 @@ import { User } from '../models/entities/User';
 import { UsersType } from '../models/enums/UsersTypeEnum';
 import { ReqResUser } from '../models/interfaces/ReqResUser';
 import { ReqResUsersService } from './ReqresUsersService';
+import { CreateMainAdminUser } from '../models/dto/CreateMainAdminUserDTO';
 
 @Injectable()
 export class UsersService {
@@ -62,7 +63,7 @@ export class UsersService {
     await this.usersRepository.create({ payload });
   }
 
-  async createMainAdminUser(payload: CreateUserDTO): Promise<void> {
+  async createMainAdminUser(payload: CreateMainAdminUser): Promise<void> {
     await this.create({ ...payload, type: UsersType.ADMIN });
   }
 }
