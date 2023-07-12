@@ -1,6 +1,17 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  ValidateIf,
+} from 'class-validator';
+import { UsersType } from '../enums/UsersTypeEnum';
 
 export class CreateUserDTO {
+  @IsOptional()
+  @IsString()
+  id: string;
+
   @IsNotEmpty()
   @IsString()
   firstName: string;
@@ -11,17 +22,25 @@ export class CreateUserDTO {
 
   @IsNotEmpty()
   @IsString()
-  email: string;
+  personalIdentifier: string; //cpf
 
   @IsNotEmpty()
+  @IsString()
+  email: string;
+
   @IsOptional()
+  @IsString()
   avatar: string;
 
   @IsNotEmpty()
-  @IsString()
-  type: string;
+  @IsEnum(UsersType)
+  type: UsersType;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  course: string;
+  courseId: string;
+
+  @ValidateIf((user) => user.type === UsersType.ADMIN)
+  @IsNotEmpty()
+  password: string;
 }
