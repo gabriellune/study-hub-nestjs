@@ -1,4 +1,10 @@
-import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateCourseDTO {
   @IsNotEmpty()
@@ -10,10 +16,10 @@ export class CreateCourseDTO {
   sector: string;
 
   @IsNotEmpty()
-  @IsOptional()
+  @IsNumber()
   duration: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsArray()
-  tasks: string[];
+  tasksIds: string[];
 }

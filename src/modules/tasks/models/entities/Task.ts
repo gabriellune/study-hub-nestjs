@@ -32,7 +32,7 @@ export class Task extends Model {
     type: DataType.STRING,
     allowNull: true,
     get() {
-      return this.getDataValue('attachments').split(';');
+      return this.getDataValue('attachments')?.split(';');
     },
     set(value: string[]) {
       this.setDataValue('attachments', value.join(';'));
