@@ -5,6 +5,8 @@ import { UsersType } from '../models/enums/UsersTypeEnum';
 import { ReqResUser } from '../models/interfaces/ReqResUser';
 import { ReqResUsersService } from './ReqresUsersService';
 import { CreateMainAdminUser } from '../models/dto/CreateMainAdminUserDTO';
+import { randomUUID } from 'crypto';
+import { IUser } from '../models/interfaces/IUser';
 
 @Injectable()
 export class UsersService {
@@ -20,6 +22,10 @@ export class UsersService {
 
   async getById(id: string): Promise<any> {
     return this.usersRepository.findOne({ where: { id } });
+  }
+
+  async getByPersonalIdentifier(personalIdentifier: string): Promise<IUser> {
+    return this.usersRepository.findOne({ where: { personalIdentifier } });
   }
 
   async getReqResUserById(id: string): Promise<ReqResUser> {
@@ -60,7 +66,8 @@ export class UsersService {
   }
 
   async create(payload: CreateUserDTO): Promise<void> {
-    await this.usersRepository.create({ payload });
+    const id = randomUUID();
+    await this.usersRepository.create({ id, ...payload });
   }
 
   async createMainAdminUser(payload: CreateMainAdminUser): Promise<void> {

@@ -18,5 +18,6 @@ import { ReqResUsersService } from './services/ReqresUsersService';
   ],
   controllers: [UsersController],
   providers: [UsersService, ReqResUsersService, ...usersRepository],
+  exports: [UsersService],
 })
 export class UsersModule {}
