@@ -13,7 +13,7 @@ export class CreateTaskDTO {
 
   @IsNotEmpty()
   @IsNumber()
-  grade: string;
+  grade: number; // nota máxima
 
   @IsOptional()
   @IsArray()
