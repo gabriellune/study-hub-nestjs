@@ -1,10 +1,10 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { UsersService } from '../services/UsersService';
+import { CreateMainAdminUser } from '../models/dto/CreateMainAdminUserDTO';
+import { CreateUserDTO } from '../models/dto/CreateUserDTO';
 import { User } from '../models/entities/User';
 import { ReqResUser } from '../models/interfaces/ReqResUser';
-import { CreateUserDTO } from '../models/dto/CreateUserDTO';
-import { CreateMainAdminUser } from '../models/dto/CreateMainAdminUserDTO';
+import { UsersService } from '../services/UsersService';
 
 @Controller('users')
 @ApiTags('Users')
