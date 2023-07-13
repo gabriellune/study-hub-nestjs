@@ -42,8 +42,10 @@ export class TasksService {
 
     newAttachments.attachments.forEach((att) => attachments.push(att));
 
+    const filteredAttachments = [...new Set(attachments)];
+
     await this.tasksRepository.update(
-      { attachments, ...task },
+      { attachments: filteredAttachments, ...task },
       { where: { id } },
     );
 
