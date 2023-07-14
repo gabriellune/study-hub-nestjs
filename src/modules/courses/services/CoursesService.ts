@@ -3,7 +3,7 @@ import { Course } from '../models/entities/Course';
 import { ICourse } from '../models/interfaces/ICourse';
 import { CreateCourseDTO } from '../models/dto/CreateCourseDTO';
 import { randomUUID } from 'crypto';
-import { TasksService } from 'src/modules/tasks/services/TasksService';
+import { TasksService } from '../../../modules/tasks/services/TasksService';
 import { AddTasksDTO } from '../models/dto/AddTasksDTO';
 
 @Injectable()
@@ -47,7 +47,7 @@ export class CoursesService {
   }
 
   private async getTaskId(id: string): Promise<string> {
-    return (await this.tasksService.getById(id))?.id ?? null;
+    return (await this.tasksService.getById(id))?.id;
   }
 
   async addTasks(id: string, newTasks: AddTasksDTO): Promise<string[]> {

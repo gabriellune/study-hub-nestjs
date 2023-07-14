@@ -8,4 +8,5 @@ export interface IUser {
   type: string;
   courseId: string;
   password: string;
+  reqResUserId: number;
 }

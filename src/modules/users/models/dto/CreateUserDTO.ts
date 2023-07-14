@@ -42,5 +42,7 @@ export class CreateUserDTO {
 
   @ValidateIf((user) => user.type === UsersType.ADMIN)
   @IsNotEmpty()
-  password: string;
+  password?: string;
+
+  reqResUserId?: number;
 }

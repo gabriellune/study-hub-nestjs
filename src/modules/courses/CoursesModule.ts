@@ -9,5 +9,6 @@ import { TasksModule } from '../tasks/TasksModule';
   imports: [DatabaseModule, TasksModule],
   controllers: [CoursesController],
   providers: [CoursesService, ...coursesRepository],
+  exports: [CoursesService],
 })
 export class CoursesModule {}

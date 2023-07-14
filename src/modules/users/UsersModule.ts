@@ -5,6 +5,7 @@ import { usersRepository } from './repository/UsersRepository';
 import { UsersService } from './services/UsersService';
 import { HttpModule } from '@nestjs/axios';
 import { ReqResUsersService } from './services/ReqresUsersService';
+import { CoursesModule } from '../courses/CoursesModule';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { ReqResUsersService } from './services/ReqresUsersService';
       }),
     }),
     DatabaseModule,
+    CoursesModule,
   ],
   controllers: [UsersController],
   providers: [UsersService, ReqResUsersService, ...usersRepository],
