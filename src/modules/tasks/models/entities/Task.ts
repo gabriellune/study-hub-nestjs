@@ -39,4 +39,10 @@ export class Task extends Model {
     },
   })
   attachments: string[];
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  courseId: string;
 }

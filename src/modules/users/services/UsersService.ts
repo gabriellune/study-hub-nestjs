@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  forwardRef,
+} from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { ICourse } from '../../../modules/courses/models/interfaces/ICourse';
 import { CoursesService } from '../../../modules/courses/services/CoursesService';
@@ -11,6 +16,7 @@ import { UsersType } from '../models/enums/UsersTypeEnum';
 import { IUser } from '../models/interfaces/IUser';
 import { ReqResUser } from '../models/interfaces/ReqResUser';
 import { ReqResUsersService } from './ReqresUsersService';
+import { EmailService } from '../../../modules/notifications/services/EmailService';
 
 @Injectable()
 export class UsersService {
@@ -18,7 +24,9 @@ export class UsersService {
     @Inject('USERS_REPOSITORY')
     private usersRepository: typeof User,
     private readonly reqResUsersService: ReqResUsersService,
+    @Inject(forwardRef(() => CoursesService))
     private readonly coursesService: CoursesService,
+    private readonly emailService: EmailService,
   ) {}
 
   async findAll(): Promise<User[]> {
@@ -138,5 +146,25 @@ export class UsersService {
     await this.usersRepository.update({ courseId, ...user }, { where: { id } });
 
     return payload.courseId;
+  }
+
+  async notifyUsers(courseId: string): Promise<void> {
+    const users = await this.usersRepository.findAll({ where: { courseId } });
+
+    const promises = [];
+
+    for (const u of users) {
+      const { email } = u;
+
+      promises.push(
+        this.emailService.sendEmail(
+          email,
+          'New Task',
+          'Hello, a new task was added on your course!',
+        ),
+      );
+    }
+
+    await Promise.all(promises);
   }
 }
