@@ -16,6 +16,6 @@ import { EmailService } from './services/EmailService';
     }),
   ],
   providers: [EmailService],
-  controllers: [],
+  exports: [EmailService],
 })
 export class NotificationModule {}

@@ -18,4 +18,8 @@ export class CreateTaskDTO {
   @IsOptional()
   @IsArray()
   attachments: string[];
+
+  @IsNotEmpty()
+  @IsString()
+  courseId: string;
 }

@@ -1,9 +1,17 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  forwardRef,
+} from '@nestjs/common';
 import { Task } from '../models/entities/Task';
 import { ITask } from '../models/interfaces/ITask';
 import { CreateTaskDTO } from '../models/dto/CreateTaskDTO';
 import { randomUUID } from 'crypto';
 import { AddAttachmentsDTO } from '../models/dto/AddAttachmentsDTO';
+import { CoursesService } from '../../../modules/courses/services/CoursesService';
+import { publisher } from '../../../utils/Publisher';
+import { UsersService } from '../../../modules/users/services/UsersService';
 
 //IMPLEMENTAR VALIDAÇÃO PDF
 
@@ -12,6 +20,10 @@ export class TasksService {
   constructor(
     @Inject('TASKS_REPOSITORY')
     private tasksRepository: typeof Task,
+    @Inject(forwardRef(() => CoursesService))
+    private readonly courseService: CoursesService,
+    @Inject(forwardRef(() => CoursesService))
+    private readonly usersService: UsersService,
   ) {}
 
   async findAll(): Promise<ITask[]> {
@@ -26,6 +38,25 @@ export class TasksService {
     const id = randomUUID();
 
     return this.tasksRepository.create({ id, ...payload });
+  }
+
+  async handleCreate(payload: CreateTaskDTO): Promise<ITask> {
+    const { courseId } = payload;
+
+    const course = await this.courseService.getById(courseId);
+
+    if (!course) {
+      throw new BadRequestException('Course not found!');
+    }
+
+    const result = await this.create(payload);
+
+    void publisher('A new task was created!');
+
+    void this.usersService.notifyUsers(courseId);
+    void this.courseService.addTasks(courseId, { tasksIds: [result.id] });
+
+    return result;
   }
 
   async addAttachments(

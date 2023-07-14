@@ -3,4 +3,5 @@ export interface ITask {
   name: string;
   grade: number;
   attachments: string[];
+  courseId: string;
 }
