@@ -18,13 +18,6 @@ export class User extends Model {
 
   @Column({
     type: DataType.STRING,
-    allowNull: true,
-    unique: true,
-  })
-  personalIdentifier: string;
-
-  @Column({
-    type: DataType.STRING,
     allowNull: false,
   })
   firstName: string;

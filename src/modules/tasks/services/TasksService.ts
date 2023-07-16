@@ -4,8 +4,8 @@ import {
   Injectable,
   forwardRef,
 } from '@nestjs/common';
-import { Task } from '../models/entities/Task';
-import { ITask } from '../models/interfaces/ITask';
+import { Task as TaskEntities } from '../models/entities/Task';
+import { Task } from '../models/classes/Task';
 import { CreateTaskDTO } from '../models/dto/CreateTaskDTO';
 import { randomUUID } from 'crypto';
 import { AddAttachmentsDTO } from '../models/dto/AddAttachmentsDTO';
@@ -19,28 +19,28 @@ import { UsersService } from '../../../modules/users/services/UsersService';
 export class TasksService {
   constructor(
     @Inject('TASKS_REPOSITORY')
-    private tasksRepository: typeof Task,
+    private tasksRepository: typeof TaskEntities,
     @Inject(forwardRef(() => CoursesService))
     private readonly courseService: CoursesService,
-    @Inject(forwardRef(() => CoursesService))
+    @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
   ) {}
 
-  async findAll(): Promise<ITask[]> {
-    return this.tasksRepository.findAll<Task>();
+  async findAll(): Promise<Task[]> {
+    return this.tasksRepository.findAll<TaskEntities>();
   }
 
-  async getById(id: string): Promise<ITask> {
+  async getById(id: string): Promise<Task> {
     return this.tasksRepository.findOne({ where: { id } });
   }
 
-  async create(payload: CreateTaskDTO): Promise<ITask> {
+  async create(payload: CreateTaskDTO): Promise<any> {
     const id = randomUUID();
 
     return this.tasksRepository.create({ id, ...payload });
   }
 
-  async handleCreate(payload: CreateTaskDTO): Promise<ITask> {
+  async handleCreate(payload: CreateTaskDTO): Promise<Task> {
     const { courseId } = payload;
 
     const course = await this.courseService.getById(courseId);
@@ -49,14 +49,28 @@ export class TasksService {
       throw new BadRequestException('Course not found!');
     }
 
-    const result = await this.create(payload);
+    payload.attachments = await this.handleAttachments(payload.attachments);
 
-    void publisher('A new task was created!');
+    const result = await this.create(payload);
 
     void this.usersService.notifyUsers(courseId);
     void this.courseService.addTasks(courseId, { tasksIds: [result.id] });
 
+    void publisher('A new task was created!');
+
     return result;
+  }
+
+  async handleAttachments(attachments: string[]): Promise<string[]> {
+    const validAttachments: string[] = [];
+
+    attachments?.forEach((res) => {
+      if (res.match(/.pdf/g)) {
+        validAttachments.push(res);
+      }
+    });
+
+    return validAttachments;
   }
 
   async addAttachments(
@@ -73,7 +87,9 @@ export class TasksService {
 
     newAttachments.attachments.forEach((att) => attachments.push(att));
 
-    const filteredAttachments = [...new Set(attachments)];
+    const filteredAttachments = [
+      ...new Set(await this.handleAttachments(attachments)),
+    ];
 
     await this.tasksRepository.update(
       { attachments: filteredAttachments, ...task },

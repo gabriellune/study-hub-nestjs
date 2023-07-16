@@ -1,34 +1,33 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
 
-export class CreateCourseDTO {
+export class Course {
+  @ApiProperty({
+    description: 'The id of the course',
+    example: 'id',
+  })
+  id: string;
+
   @ApiProperty({
     description: 'The name of the course',
     example: 'name',
   })
-  @IsNotEmpty()
-  @IsString()
   name: string;
 
   @ApiProperty({
     description: 'The sector of the course',
     example: 'sector',
   })
-  @IsNotEmpty()
-  @IsString()
   sector: string;
 
   @ApiProperty({
-    description: 'The duration (minutes) of the course',
+    description: 'The duration of the course',
     example: 60,
   })
-  @IsNotEmpty()
-  @IsNumber()
   duration: number;
+
+  @ApiProperty({
+    description: 'The tasks ids of the course',
+    example: ['taskId'],
+  })
+  tasksIds: string[];
 }

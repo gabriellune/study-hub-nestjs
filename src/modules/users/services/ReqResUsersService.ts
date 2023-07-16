@@ -1,7 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import 'dotenv/config';
-import { ReqResUser } from '../models/interfaces/ReqResUser';
+import { ReqResUser } from '../models/classes/ReqResUser';
 
 @Injectable()
 export class ReqResUsersService {

@@ -5,16 +5,16 @@ import {
   forwardRef,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { ICourse } from '../../../modules/courses/models/interfaces/ICourse';
+import { Course } from '../../courses/models/classess/Course';
 import { CoursesService } from '../../../modules/courses/services/CoursesService';
 import { hashPassword } from '../../../utils/BCrypt';
 import { AddCourseDTO } from '../models/dto/AddCourseDTO';
 import { CreateMainAdminUser } from '../models/dto/CreateMainAdminUserDTO';
 import { CreateUserDTO } from '../models/dto/CreateUserDTO';
-import { User } from '../models/entities/User';
+import { User as UserEntities } from '../models/entities/User';
 import { UsersType } from '../models/enums/UsersTypeEnum';
-import { IUser } from '../models/interfaces/IUser';
-import { ReqResUser } from '../models/interfaces/ReqResUser';
+import { User } from '../models/classes/User';
+import { ReqResUser } from '../models/classes/ReqResUser';
 import { ReqResUsersService } from './ReqresUsersService';
 import { EmailService } from '../../../modules/notifications/services/EmailService';
 
@@ -22,7 +22,7 @@ import { EmailService } from '../../../modules/notifications/services/EmailServi
 export class UsersService {
   constructor(
     @Inject('USERS_REPOSITORY')
-    private usersRepository: typeof User,
+    private usersRepository: typeof UserEntities,
     private readonly reqResUsersService: ReqResUsersService,
     @Inject(forwardRef(() => CoursesService))
     private readonly coursesService: CoursesService,
@@ -30,24 +30,24 @@ export class UsersService {
   ) {}
 
   async findAll(): Promise<User[]> {
-    return this.usersRepository.findAll<User>();
+    return this.usersRepository.findAll<UserEntities>();
   }
 
-  async getById(id: string): Promise<IUser> {
+  async getById(id: string): Promise<User> {
     return this.usersRepository.findOne({ where: { id } });
   }
 
   async getCourseAndUserById(
     id: string,
-  ): Promise<{ user: IUser; course: ICourse }> {
+  ): Promise<{ user: User; course: Course }> {
     const user = await this.getById(id);
     const course =
-      user && user.courseId ? await this.getCourse(user.courseId) : null; //quebrar essa rota
+      user && user.courseId ? await this.getCourse(user.courseId) : null;
     return { user, course };
   }
 
-  async getByPersonalIdentifier(personalIdentifier: string): Promise<IUser> {
-    return this.usersRepository.findOne({ where: { personalIdentifier } });
+  async getByEmail(email: string): Promise<User> {
+    return this.usersRepository.findOne({ where: { email } });
   }
 
   async getReqResUser(id: number): Promise<ReqResUser> {
@@ -87,40 +87,66 @@ export class UsersService {
   }
 
   async create(payload: CreateUserDTO): Promise<void> {
+    const { email } = payload;
+
+    const existentUser = await this.getByEmail(email);
+
+    if (existentUser) {
+      throw new BadRequestException('User already registered!');
+    }
+
     const id = randomUUID();
     await this.usersRepository.create({ id, ...payload });
   }
 
-  async createMainAdminUser(payload: CreateMainAdminUser): Promise<void> {
+  async createMainAdminUser(
+    payload: CreateMainAdminUser,
+  ): Promise<{ message: string }> {
     const password = hashPassword(payload.password);
     await this.create({ ...payload, password, type: UsersType.ADMIN });
+
+    return { message: 'User Created Sucessfully' };
   }
 
-  async handleCreateUser(payload: CreateUserDTO): Promise<void> {
-    switch (payload.type) {
-      case UsersType.ADMIN:
-        await this.handleAdminUser(payload);
-      case UsersType.STUDENT:
-        await this.handleStudentUser(payload);
+  async handleCreateUser(payload: CreateUserDTO): Promise<{ message: string }> {
+    try {
+      switch (payload.type) {
+        case UsersType.ADMIN:
+          return this.handleAdminUser(payload);
+        case UsersType.STUDENT:
+          return this.handleStudentUser(payload);
+      }
+    } catch (err) {
+      throw new BadRequestException(err);
     }
   }
 
-  async handleAdminUser(payload: CreateUserDTO): Promise<void> {
+  async handleAdminUser(payload: CreateUserDTO): Promise<{ message: string }> {
     const password = hashPassword(payload.password);
     await this.create({ ...payload, password });
+    return { message: 'User Created Sucessfully' };
   }
 
-  async handleStudentUser(payload: CreateUserDTO): Promise<void> {
+  async handleStudentUser(
+    payload: CreateUserDTO,
+  ): Promise<{ message: string }> {
     const { courseId } = payload;
-    if (courseId && (await this.getCourse(courseId))) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password, ...rest } = payload;
 
-      await this.create(rest);
+    if (courseId) {
+      const course = await this.getCourse(courseId);
+      if (!course) {
+        throw new BadRequestException('Course doesnt exists!');
+      }
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...rest } = payload;
+
+    await this.create(rest);
+
+    return { message: 'User Created Successfully' };
   }
 
-  private async getCourse(id: string): Promise<ICourse> {
+  private async getCourse(id: string): Promise<Course> {
     const course = await this.coursesService.getById(id);
 
     if (!course) return null;
