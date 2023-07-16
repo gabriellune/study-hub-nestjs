@@ -1,16 +1,12 @@
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Patch,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { AddTasksDTO } from '../models/dto/AddTasksDTO';
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CreateCourseDTO } from '../models/dto/CreateCourseDTO';
-import { ICourse } from '../models/interfaces/ICourse';
+import { Course } from '../models/classess/Course';
 import { CoursesService } from '../services/CoursesService';
 import { AuthGuard } from '../../../modules/auth/shared/AuthGuard';
 
@@ -20,32 +16,34 @@ export class CoursesController {
   constructor(private service: CoursesService) {}
 
   @Get()
+  @ApiOkResponse({
+    description: 'Find All Courses!',
+    type: Course,
+  })
   @ApiOperation({ summary: 'Find all Courses' })
-  async findAll(): Promise<ICourse[]> {
+  async findAll(): Promise<Course[]> {
     return this.service.findAll();
   }
 
   @UseGuards(AuthGuard)
   @Get(':id')
+  @ApiOkResponse({
+    description: 'Find Course!',
+    type: Course,
+  })
   @ApiOperation({ summary: 'Find Course by Id' })
-  async getById(@Param('id') id: string): Promise<ICourse> {
+  async getById(@Param('id') id: string): Promise<Course> {
     return this.service.getById(id);
   }
 
   @UseGuards(AuthGuard)
   @Post()
+  @ApiCreatedResponse({
+    description: 'Created user!',
+    type: Course,
+  })
   @ApiOperation({ summary: 'Create Course' })
-  async create(@Body() payload: CreateCourseDTO): Promise<ICourse> {
+  async create(@Body() payload: CreateCourseDTO): Promise<Course> {
     return this.service.create(payload);
-  }
-
-  @UseGuards(AuthGuard)
-  @Patch(':id/add-tasks')
-  @ApiOperation({ summary: 'Add Tasks' })
-  async addAttachments(
-    @Param('id') id: string,
-    @Body() payload: AddTasksDTO,
-  ): Promise<string[]> {
-    return this.service.addTasks(id, payload);
   }
 }

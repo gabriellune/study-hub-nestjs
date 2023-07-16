@@ -1,6 +1,6 @@
 import { Injectable, Inject, BadRequestException } from '@nestjs/common';
-import { Course } from '../models/entities/Course';
-import { ICourse } from '../models/interfaces/ICourse';
+import { Course as CourseEntities } from '../models/entities/Course';
+import { Course } from '../models/classess/Course';
 import { CreateCourseDTO } from '../models/dto/CreateCourseDTO';
 import { randomUUID } from 'crypto';
 import { TasksService } from '../../../modules/tasks/services/TasksService';
@@ -10,29 +10,24 @@ import { AddTasksDTO } from '../models/dto/AddTasksDTO';
 export class CoursesService {
   constructor(
     @Inject('COURSES_REPOSITORY')
-    private coursesRepository: typeof Course,
+    private coursesRepository: typeof CourseEntities,
     private tasksService: TasksService,
   ) {}
 
-  async findAll(): Promise<ICourse[]> {
-    return this.coursesRepository.findAll<Course>();
+  async findAll(): Promise<Course[]> {
+    return this.coursesRepository.findAll<CourseEntities>();
   }
 
-  async getById(id: string): Promise<ICourse> {
+  async getById(id: string): Promise<Course> {
     return this.coursesRepository.findOne({ where: { id } });
   }
 
-  async create(payload: CreateCourseDTO): Promise<ICourse> {
+  async create(payload: CreateCourseDTO): Promise<Course> {
     const id = randomUUID();
-
-    const { tasksIds } = payload;
-
-    const validIds = (await this.checkExistentTasks(tasksIds)).filter(Boolean);
 
     return this.coursesRepository.create({
       id,
       ...payload,
-      tasksIds: validIds,
     });
   }
 

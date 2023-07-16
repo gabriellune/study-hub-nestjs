@@ -10,10 +10,9 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async login(personalIdentifier: string, password: string) {
-    const user = await this.usersService.getByPersonalIdentifier(
-      personalIdentifier,
-    );
+  async login(email: string, password: string) {
+    const user = await this.usersService.getByEmail(email);
+
     if (user) {
       if (!compareHash(password, user.password)) {
         throw new UnauthorizedException();
